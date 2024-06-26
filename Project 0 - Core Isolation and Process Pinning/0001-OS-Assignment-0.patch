@@ -1,0 +1,103 @@
+From b8dc1c8a387729bd6c5d37f5ae6c16d84ed514a7 Mon Sep 17 00:00:00 2001
+From: Milin <milinbhade@iisc.ac.in>
+Date: Sun, 29 Jan 2023 23:13:30 +0530
+Subject: [PATCH] OS Assignment-0
+
+Signed-off-by: Milin <milinbhade@iisc.ac.in>
+---
+ Makefile                               |  3 ++-
+ arch/x86/entry/syscalls/syscall_64.tbl |  1 +
+ include/linux/syscalls.h               |  3 +++
+ isolate/Makefile                       |  1 +
+ isolate/isolate.c                      | 30 ++++++++++++++++++++++++++
+ 5 files changed, 37 insertions(+), 1 deletion(-)
+ create mode 100755 isolate/Makefile
+ create mode 100755 isolate/isolate.c
+
+diff --git a/Makefile b/Makefile
+index b978809a1..55e46b1ce 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1101,10 +1101,11 @@ export MODORDER := $(extmod_prefix)modules.order
+ export MODULES_NSDEPS := $(extmod_prefix)modules.nsdeps
+ 
+ ifeq ($(KBUILD_EXTMOD),)
+-core-y			+= kernel/ certs/ mm/ fs/ ipc/ security/ crypto/
++core-y			+= kernel/ certs/ mm/ fs/ ipc/ security/ crypto/ isolate/
+ core-$(CONFIG_BLOCK)	+= block/
+ core-$(CONFIG_IO_URING)	+= io_uring/
+ 
++
+ vmlinux-dirs	:= $(patsubst %/,%,$(filter %/, \
+ 		     $(core-y) $(core-m) $(drivers-y) $(drivers-m) \
+ 		     $(libs-y) $(libs-m)))
+diff --git a/arch/x86/entry/syscalls/syscall_64.tbl b/arch/x86/entry/syscalls/syscall_64.tbl
+index c84d12608..ddd3a654e 100644
+--- a/arch/x86/entry/syscalls/syscall_64.tbl
++++ b/arch/x86/entry/syscalls/syscall_64.tbl
+@@ -372,6 +372,7 @@
+ 448	common	process_mrelease	sys_process_mrelease
+ 449	common	futex_waitv		sys_futex_waitv
+ 450	common	set_mempolicy_home_node	sys_set_mempolicy_home_node
++451	common	isolate			sys_isolate
+ 
+ #
+ # Due to a historical design error, certain syscalls are numbered differently
+diff --git a/include/linux/syscalls.h b/include/linux/syscalls.h
+index a34b0f9a9..527187309 100644
+--- a/include/linux/syscalls.h
++++ b/include/linux/syscalls.h
+@@ -1385,4 +1385,7 @@ int __sys_getsockopt(int fd, int level, int optname, char __user *optval,
+ 		int __user *optlen);
+ int __sys_setsockopt(int fd, int level, int optname, char __user *optval,
+ 		int optlen);
++
++asmlinkage long sys_isolate(void);
++		
+ #endif
+diff --git a/isolate/Makefile b/isolate/Makefile
+new file mode 100755
+index 000000000..1416a2ae1
+--- /dev/null
++++ b/isolate/Makefile
+@@ -0,0 +1 @@
++obj-y := isolate.o
+diff --git a/isolate/isolate.c b/isolate/isolate.c
+new file mode 100755
+index 000000000..71247f8b9
+--- /dev/null
++++ b/isolate/isolate.c
+@@ -0,0 +1,30 @@
++#define _GNU_SOURCE
++#include <linux/kernel.h>
++#include <linux/syscalls.h>
++#include <linux/sched.h>
++#include <linux/cpumask.h>
++
++SYSCALL_DEFINE0(isolate){
++	struct task_struct *p;
++	int count = 0;
++	struct cpumask new_mask;
++	int result=0;
++	
++	cpumask_clear(&new_mask);
++	cpumask_set_cpu(0, &new_mask);
++	cpumask_set_cpu(2, &new_mask);
++	cpumask_set_cpu(3, &new_mask);
++	// CPU core 1 is chosen to isolate because it has less kernel noise than CPU core 0
++	
++	for_each_process(p) {
++		count+=1;
++		result = sched_setaffinity(task_pid_nr(p), &new_mask);
++		if(result == -1){
++    			printk("Task %s (pid = %d) : Affinity not set\n",p->comm, task_pid_nr(p));
++		}else{
++			printk("Task %s (pid = %d) : Affinity set\n", p->comm, task_pid_nr(p));
++		}
++	}
++	printk("No of processes in taskList: %d\n", count);
++	return 0;
++}
+-- 
+2.34.1
+
