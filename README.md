@@ -120,29 +120,29 @@ The `mmcontext` system call accepts an integer argument:
 4. Support single-threaded programs only.
 5. Ensure no memory leaks upon process termination.
 
-## Implementation Details
-### Key Components
+### Implementation Details
+#### Key Components
 - **Memory State Management**: Manage the state of dynamically allocated anonymous memory.
 - **Error Handling**: Handle errors like invalid arguments, existing contexts, and more.
 - **Performance Optimization**: Ensure minimal overhead compared to the fork-based method.
 
-### Assumptions
+#### Assumptions
 - Ignore the state of the process stack, files, signals, and registers.
 - Ensure address space remains unaltered between save and restore calls.
 - Clean up process state upon termination to avoid memory leaks.
 
-## Evaluation
+### Evaluation
 The implementation will be evaluated based on:
 1. **Functional Correctness**: The system call should work for various program sizes.
 2. **Performance**: Compared against the fork-based method in terms of throughput.
 
-## Getting Started
-### Prerequisites
+### Getting Started
+#### Prerequisites
 - Linux kernel source code
 - GCC compiler
 - Git
 
-### Setup
+#### Setup
 1. Clone the repository:
    ```bash
    git clone https://github.com/csl-iisc/e0253-os-2023.git
