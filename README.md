@@ -16,6 +16,17 @@ This project focuses on building and integrating a new task scheduler within the
 #### (Kernel Programming, Page fault handling, System-call Implementation)
 Implemented an in-kernel page fault handling mechanism to facilitate saving or restoring process context to mitigate risk associated with unsafe code execution. Compared to fork this light weight mechanism observed speedup of 30x
 
+1. **Project 0: Core Isolation and Process Pinning**
+   - **(Kernel Programming, System Call Implementation, Kernel Debugging)**
+   This project involves isolating a CPU core and pinning specific processes to that core. The goal is to create a controlled environment for testing and performance analysis.
+
+2. **Project 1: Rotating Staircase Deadline Scheduler (RSDL)**
+   - **(Linux Scheduling, Kernel Programming, RSDL)**
+   This project focuses on building and integrating a new task scheduler within the Linux kernel. The scheduler, known as the Rotating Staircase Deadline Scheduler (RSDL), ensures fairness, bounded latency, no starvation, and good interactivity. The scheduler was configured to schedule normal processes running on a particular isolated core. Used CPU-SETs, CPU-Hotplugging functionality for isolating the core.
+
+3. **Project 2: Process Checkpointing - Context-Based Memory State Management**
+   - **(Kernel Programming, Page fault handling, System-call Implementation)**
+   Implemented an in-kernel page fault handling mechanism to facilitate saving or restoring process context to mitigate risk associated with unsafe code execution. Compared to fork this light weight mechanism observed speedup of 30x
 
 ## Project 0: Core Isolation and Process Pinning
 
